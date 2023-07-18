@@ -48,7 +48,7 @@ mask_data = True
 
 """
 # Read the data 
-input_filename = 'hlsp_muscles_hst_stis_tau_ceti_e140m_v1_component-spec.fits'
+input_filename = 'hlsp_space_hst_stis_toi-1201_g140m_v1_component-spec.fits'
 data = fits.getdata(input_filename)
 wave_to_fit = data['WAVELENGTH']
 flux_to_fit = data['FLUX']
@@ -103,7 +103,7 @@ else:
 # If you want to use one of the LSF's from STScI's website, currently you must download it locally
 # as a text file and read it in here. Comment the next 5 lines out if not using this, and set 
 # the resolution keyword to a float.
-lsf_filename = 'STIS_E140M_LSF.dat'
+lsf_filename = 'LSF_G140M_1200.dat'
 lsf = np.loadtxt(lsf_filename,skiprows=2) # 0.2x0.2 E140M - confirmed from MAST
 lsf_wave = lsf[:,0] # STIs model
 lsf_array = lsf[:,3] # aperature
