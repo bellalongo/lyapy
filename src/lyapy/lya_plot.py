@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from lyapy import lyapy
+from lyapy import *
 import corner as triangle
 from matplotlib.ticker import NullFormatter,MultipleLocator, FormatStrFormatter, MaxNLocator
 import time

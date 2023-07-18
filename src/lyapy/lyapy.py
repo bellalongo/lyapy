@@ -2,7 +2,7 @@ import numpy as np
 import astropy.io.fits as pyfits
 import matplotlib.pyplot as plt
 import astropy.table
-from lyapy import voigt ## this is my voigt.py file
+from voigt import *  ## this is my voigt.py file
 import scipy.stats
 from astropy.modeling.models import Voigt1D, Lorentz1D, Gaussian1D
 
@@ -435,7 +435,7 @@ def tau_profile(ncols,vshifts,vdop,which_line,wave_cut_off=2.0):
 
     u_parameter = (freq_onesided-nu0s)/nuds  ## Voigt "u" parameter -- dimensionless frequency offset
 
-    xsections_onesided=xsections_nearlinecenter*voigt.voigt(a_parameter,u_parameter)  ## cross-sections
+    xsections_onesided=xsections_nearlinecenter*voigt(a_parameter,u_parameter)  ## cross-sections
                                                                                 # single sided
                                                                                 ## can't do symmetrical 
 
@@ -490,31 +490,44 @@ def mask_spectrum(flux_to_fit,interactive=True,mask_lower_limit=None,mask_upper_
 
 
 def ready_stis_lsf(orig_lsf_wave,orig_lsf,stis_grating_disp,data_wave):
+    # Find the spacing between two wavelength elements
+    data_wave_spacing = data_wave[1]-data_wave[0]
+    # Find the length of the data_wave array
+    data_wave_length = len(data_wave)
 
+    # Define a new LSF wavelength array (lsf_lam) to interpolate orig_lsf onto. lsf_lam has the same wavelength spacing as the data array
+    # Find the minimum wavelength of the LSF wavelength array
+    lsf_lam_min = np.round(np.min(orig_lsf_wave*stis_grating_disp)/data_wave_spacing) * data_wave_spacing 
+    # Create an array that starts at lsf_min and decreases by data_wave spacing until it hits 0
+    lsf_lam_onesided = np.arange(lsf_lam_min,0,data_wave_spacing)  
 
-  data_wave_spacing = data_wave[1]-data_wave[0]
-  data_wave_length = len(data_wave)
+    # Get rid of the first element if lsf_lam_onesided has an odd number of elements
+    if len(lsf_lam_onesided) % 2 != 0: 
+        lsf_lam_onesided = lsf_lam_onesided[1::] 
 
-  # define a new LSF wavelength array (lsf_lam) to interpolate orig_lsf onto. lsf_lam has the same wavelength spacing as the data array
-  # 
-  lsf_lam_min = np.round(np.min(orig_lsf_wave*stis_grating_disp)/data_wave_spacing) * data_wave_spacing # minimum wavelength for lsf_lam
-  lsf_lam_onesided = np.arange(lsf_lam_min,0,data_wave_spacing)  
-  if len(lsf_lam_onesided) % 2 != 0: ### Make sure it's even and doesn't include zero
-    lsf_lam_onesided = lsf_lam_onesided[1::] # get rid of the first element of the array if lsf_lam_onesided is odd
+    # Make it symmetrical so + 0 -
+    # Flip lsf_lam_onesided and make the values negative
+    lsf_lam_flipped = -1*lsf_lam_onesided[::-1] 
+    # Add 0 to the end of the array
+    lsf_lam_pluszero = np.append(lsf_lam_onesided,np.array([0]))
+    # Add the flipped array to the end of lsf_lam_pluszero
+    lsf_lam = np.append(lsf_lam_pluszero,lsf_lam_flipped)
 
-  lsf_lam_flipped = -1*lsf_lam_onesided[::-1] # flip it to make it symmetrical
-  lsf_lam_pluszero=np.append(lsf_lam_onesided,np.array([0])) # add zero
-  lsf_lam=np.append(lsf_lam_pluszero,lsf_lam_flipped) # add the flipped array - lsf_lam should be odd
+    # Perform a linear interpolation:
+    # lsf_lam-where y should be guessed
+    # orig_lsf_wave*stis_grating_disp (x) orig_lsf/np.sum(orig_lsf) (y)
+    lsf_interp = np.interp(lsf_lam,orig_lsf_wave*stis_grating_disp,orig_lsf/np.sum(orig_lsf))
+    # Normalize
+    lsf_interp_norm = lsf_interp/np.sum(lsf_interp)
 
-  lsf_interp = np.interp(lsf_lam,orig_lsf_wave*stis_grating_disp,orig_lsf/np.sum(orig_lsf))
-  lsf_interp_norm = lsf_interp/np.sum(lsf_interp)#np.trapz(lsf_interp,lsf_lam) 
+    # Adjust the normalized array
+    if data_wave_length < len(lsf_interp_norm):
+        lsf_interp_norm = np.delete(lsf_interp_norm,np.where(lsf_interp_norm == 0))
+        lsf_interp_norm = np.insert(lsf_interp_norm,0,0)
+        lsf_interp_norm = np.append(lsf_interp_norm,0)
 
-  if data_wave_length < len(lsf_interp_norm):
-      lsf_interp_norm = np.delete(lsf_interp_norm,np.where(lsf_interp_norm == 0))
-      lsf_interp_norm = np.insert(lsf_interp_norm,0,0)
-      lsf_interp_norm = np.append(lsf_interp_norm,0)
-
-  return lsf_interp_norm
+    # Return the normalized lsf 
+    return lsf_interp_norm
 
 ## Define priors and likelihoods, where parameters are fixed
 def lnprior(theta, minmax, prior_Gauss, prior_list):
