@@ -35,7 +35,7 @@ start_uniform = False
 nruns = 1
 
 # if True: starts the fit from scratch. if False: picks up where the fit left off.
-fresh_start = True 
+fresh_start = True
 # if True: does a long error estimation. Don't set to True until your fit has converged and you're satisfied with it.
 perform_error = False 
 # if True: allows the user to mask out part(s) of their data from being evaluated by the log probability function (e.g., airglow)
@@ -48,7 +48,7 @@ mask_data = True
 
 """
 # Read the data 
-input_filename = 'hlsp_space_hst_stis_toi-1201_g140m_v1_component-spec.fits'
+input_filename = 'spectra/hlsp_space_hst_stis_toi-1201_g140m_v1_component-spec.fits'
 data = fits.getdata(input_filename)
 wave_to_fit = data['WAVELENGTH']
 flux_to_fit = data['FLUX']
@@ -103,7 +103,7 @@ else:
 # If you want to use one of the LSF's from STScI's website, currently you must download it locally
 # as a text file and read it in here. Comment the next 5 lines out if not using this, and set 
 # the resolution keyword to a float.
-lsf_filename = 'LSF_G140M_1200.dat'
+lsf_filename = 'lsf/LSF_G140M_1200.dat'
 lsf = np.loadtxt(lsf_filename,skiprows=2) # 0.2x0.2 E140M - confirmed from MAST
 lsf_wave = lsf[:,0] # STIs model
 lsf_array = lsf[:,3] # aperature
@@ -130,9 +130,9 @@ resolution = [lsf_list]
 def my_model(x, resolution, parameters, variables, lnlike=True, convolve=True): 
 
     ## Define variables to be used ##
-    # vs - radioal velocity
+    # vs - radial velocity
     # am - log of the amplitude
-    # fw_L - width of the lorenzien peak
+    # fw_L - width of the lorenzian peak
     # fw_G - width of the Guassian peak
     # h1_col - log of the interstellar medium
     # h1_b -  doppler broadening parameter
@@ -217,11 +217,11 @@ variables = make_parameter_dictionary(variables_order)
 
 p = 'vs'
 variables[p]['texname'] = r'$v$' # for the cornerplot
-variables[p]['value'] = -87 # if vary = False, then this is the value of this variable assumed by the model. If uniform=False (set at the beginning), then this is the mean of the Gaussian distribution for the walkers' starting points for this variable
+variables[p]['value'] = 12.919641231348859 # if vary = False, then this is the value of this variable assumed by the model. If uniform=False (set at the beginning), then this is the mean of the Gaussian distribution for the walkers' starting points for this variable
 variables[p]['vary'] = True 
 variables[p]['scale'] = 3.6 #  if uniform=False (set at beginning), then this is the stddev of the Gaussian distribution for the walkers' starting points for this variable
-variables[p]['min'] = -100  # minimum of the parameter range
-variables[p]['max'] = -75 # maximum of the parameter range
+variables[p]['min'] = -300  # minimum of the parameter range
+variables[p]['max'] = 300 # maximum of the parameter range
 variables[p]['my model'] = my_model # make sure this points to your model function
 variables[p]['Gaussian prior'] = False # do you want this parameter to have a Gaussian prior? If False, then the prior is uniform between min and max
 variables[p]['prior mean'] = -129.3 # Gaussian prior mean
@@ -229,27 +229,27 @@ variables[p]['prior stddev'] = 0.6 # Gaussian prior std dev
 
 p = 'am'
 variables[p]['texname'] = r'$log A$'
-variables[p]['value'] = -10.06
+variables[p]['value'] = -13
 variables[p]['vary'] = True
 variables[p]['scale'] = 0.1
-variables[p]['min'] = -18.
-variables[p]['max'] = -8.
+variables[p]['min'] = -13.
+variables[p]['max'] = -9.
 
 p = 'fw_L'
 variables[p]['texname'] = r'$FW_{L}$'
 variables[p]['value'] = 7.76
 variables[p]['vary'] = True
 variables[p]['scale'] = 1.
-variables[p]['min'] = 1.
-variables[p]['max'] = 1000.
+variables[p]['min'] = 5.
+variables[p]['max'] = 100.
 
 p = 'fw_G'
 variables[p]['texname'] = r'$FW_{G}$'
 variables[p]['value'] = 88.68
 variables[p]['scale'] = 9.
 variables[p]['vary'] = True
-variables[p]['min'] = 1.
-variables[p]['max'] = 1000.
+variables[p]['min'] = 10.
+variables[p]['max'] = 200.
 
 p = 'h1_col'
 variables[p]['texname'] = r'$log N(HI)$'
@@ -257,15 +257,15 @@ variables[p]['value'] = 17.84
 variables[p]['vary'] = True
 variables[p]['scale'] = 0.05
 variables[p]['min'] = 17.5
-variables[p]['max'] = 18.9
+variables[p]['max'] = 19.
 
 p = 'h1_b' 
 variables[p]['texname'] = 'b',
 variables[p]['value'] = 11.84
 variables[p]['vary'] = True 
 variables[p]['scale'] = 0.7
-variables[p]['min'] = 8.6
-variables[p]['max'] = 20.
+variables[p]['min'] = 6
+variables[p]['max'] = 15.
 variables[p]['Gaussian prior'] = False
 variables[p]['prior mean'] = 11.5
 variables[p]['prior stddev'] = 3
@@ -275,8 +275,8 @@ variables[p]['texname'] = r'$v_{HI}$'
 variables[p]['value'] = 4.18
 variables[p]['vary'] = True 
 variables[p]['scale'] = 1.
-variables[p]['min'] = -30
-variables[p]['max'] = 30.
+variables[p]['min'] = -40
+variables[p]['max'] = 40.
 variables[p]['offset'] = False # do you want this parameter to be offset from the vs parameter, or independent?
 variables[p]['Gaussian prior'] = False
 variables[p]['prior mean'] = -26.58
@@ -392,7 +392,7 @@ line_percentiles_to_store_dic, reconstructed_fluxes_dic = profile_plot(wave_to_f
     
 """
 if perform_error:
-    filename="GJ411_MCMC_results.csv"  # EDIT ME FOR EACH FIT!
+    filename="TOI-1212_MCMC_results.csv"  # EDIT ME FOR EACH FIT!
 
     line_names = ['lya']
     array_per_line_names = ['model', 'model unconvolved', 'intrinsic', 'intrinsic unconvolved', 'ism', 'ism unconvolved', 
