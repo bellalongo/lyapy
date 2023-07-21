@@ -215,9 +215,10 @@ variables_order = ['vs', 'am', 'fw_L', 'fw_G',
 
 variables = make_parameter_dictionary(variables_order)
 
+# value: median(min,max)
 p = 'vs'
 variables[p]['texname'] = r'$v$' # for the cornerplot
-variables[p]['value'] = 12.919641231348859 # if vary = False, then this is the value of this variable assumed by the model. If uniform=False (set at the beginning), then this is the mean of the Gaussian distribution for the walkers' starting points for this variable
+variables[p]['value'] = 0 # if vary = False, then this is the value of this variable assumed by the model. If uniform=False (set at the beginning), then this is the mean of the Gaussian distribution for the walkers' starting points for this variable
 variables[p]['vary'] = True 
 variables[p]['scale'] = 3.6 #  if uniform=False (set at beginning), then this is the stddev of the Gaussian distribution for the walkers' starting points for this variable
 variables[p]['min'] = -300  # minimum of the parameter range
@@ -229,27 +230,27 @@ variables[p]['prior stddev'] = 0.6 # Gaussian prior std dev
 
 p = 'am'
 variables[p]['texname'] = r'$log A$'
-variables[p]['value'] = -13
+variables[p]['value'] = -10.06
 variables[p]['vary'] = True
 variables[p]['scale'] = 0.1
-variables[p]['min'] = -13.
-variables[p]['max'] = -9.
+variables[p]['min'] = -18.
+variables[p]['max'] = -8.
 
 p = 'fw_L'
 variables[p]['texname'] = r'$FW_{L}$'
 variables[p]['value'] = 7.76
 variables[p]['vary'] = True
 variables[p]['scale'] = 1.
-variables[p]['min'] = 5.
-variables[p]['max'] = 100.
+variables[p]['min'] = 1.
+variables[p]['max'] = 1000.
 
 p = 'fw_G'
 variables[p]['texname'] = r'$FW_{G}$'
 variables[p]['value'] = 88.68
 variables[p]['scale'] = 9.
 variables[p]['vary'] = True
-variables[p]['min'] = 10.
-variables[p]['max'] = 200.
+variables[p]['min'] = 1.
+variables[p]['max'] = 1000.
 
 p = 'h1_col'
 variables[p]['texname'] = r'$log N(HI)$'
@@ -257,15 +258,15 @@ variables[p]['value'] = 17.84
 variables[p]['vary'] = True
 variables[p]['scale'] = 0.05
 variables[p]['min'] = 17.5
-variables[p]['max'] = 19.
+variables[p]['max'] = 18.9
 
 p = 'h1_b' 
 variables[p]['texname'] = 'b',
 variables[p]['value'] = 11.84
 variables[p]['vary'] = True 
 variables[p]['scale'] = 0.7
-variables[p]['min'] = 6
-variables[p]['max'] = 15.
+variables[p]['min'] = 8.6
+variables[p]['max'] = 20.
 variables[p]['Gaussian prior'] = False
 variables[p]['prior mean'] = 11.5
 variables[p]['prior stddev'] = 3
@@ -275,8 +276,8 @@ variables[p]['texname'] = r'$v_{HI}$'
 variables[p]['value'] = 4.18
 variables[p]['vary'] = True 
 variables[p]['scale'] = 1.
-variables[p]['min'] = -40
-variables[p]['max'] = 40.
+variables[p]['min'] = -30
+variables[p]['max'] = 30.
 variables[p]['offset'] = False # do you want this parameter to be offset from the vs parameter, or independent?
 variables[p]['Gaussian prior'] = False
 variables[p]['prior mean'] = -26.58
