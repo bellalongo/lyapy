@@ -12,6 +12,7 @@ from astropy.io import fits
 
 
 plt.ion()
+start_time = time.time()
 
 
 """
@@ -20,9 +21,9 @@ plt.ion()
 
 """
 # Define parameters for the MCMC
-nwalkers = 16 # how many walkers do you want for your fit? 
-nsteps = 100 # how many steps?
-burnin = 50 # how long is your burnin period?
+nwalkers = 30 # how many walkers do you want for your fit? 
+nsteps = 300 # how many steps?
+burnin = 80 # how long is your burnin period?
 
 # Define necessary varialbes
 np.random.seed(982) # change as you see fit. Doesn't really matter.
@@ -32,14 +33,14 @@ np.random.seed(982) # change as you see fit. Doesn't really matter.
 start_uniform = False 
 
 # how many runs do you want to do? Keep at 1 until you know what you're doing.
-nruns = 1
+nruns = 1# change me next
 
 # if True: starts the fit from scratch. if False: picks up where the fit left off.
 fresh_start = True
 # if True: does a long error estimation. Don't set to True until your fit has converged and you're satisfied with it.
 perform_error = False 
 # if True: allows the user to mask out part(s) of their data from being evaluated by the log probability function (e.g., airglow)
-mask_data = True 
+mask_data = True
 
 
 """
@@ -55,11 +56,11 @@ flux_to_fit = data['FLUX']
 error_to_fit = data['ERROR']
 
 # Mask out the Lyman Alpha line
-fit_mask = (wave_to_fit >= 1214.5) & (wave_to_fit <= 1216.55) 
+fit_mask = (wave_to_fit >= 1214.1) & (wave_to_fit <= 1218) 
 
 # Fit the continuum and subtract - not going to do this for E140M...
 cont_mask1 = (wave_to_fit > 1212.) & (wave_to_fit < 1213) # 
-cont_mask2 = (wave_to_fit > 1217.) & (wave_to_fit < 1217.9)
+cont_mask2 = (wave_to_fit > 1219.) & (wave_to_fit < 1220)
 cont_mask = cont_mask1 + cont_mask2 
 
 # Make the continuum
@@ -71,7 +72,7 @@ plt.plot(wave_to_fit,flux_to_fit)
 plt.plot(wave_to_fit,cont)
 
 # Finding the flux (all flux - continuum)
-flux_to_fit = flux_to_fit[fit_mask] - cont[fit_mask] 
+flux_to_fit = flux_to_fit[fit_mask] - cont[fit_mask] # issues might be here
 
 wave_to_fit = wave_to_fit[fit_mask] 
 error_to_fit = error_to_fit[fit_mask]
@@ -97,7 +98,7 @@ if mask_data:
     mask = (wave_to_fit >= 1215.6081) & (wave_to_fit <=1215.7470)
 
 else:
-    mask = np.isreal(wave_to_fit) # otherwise all elements of wave_to_fit evaluated by fit
+    mask = np.isreal(wave_to_fit) # otherwise all elements of wave_to_fit evaluated by fit (fix me why np.arrange error)
 
 ## Note: ##
 # If you want to use one of the LSF's from STScI's website, currently you must download it locally
@@ -218,11 +219,11 @@ variables = make_parameter_dictionary(variables_order)
 # value: median(min,max)
 p = 'vs'
 variables[p]['texname'] = r'$v$' # for the cornerplot
-variables[p]['value'] = 0 # if vary = False, then this is the value of this variable assumed by the model. If uniform=False (set at the beginning), then this is the mean of the Gaussian distribution for the walkers' starting points for this variable
+variables[p]['value'] = 50 # if vary = False, then this is the value of this variable assumed by the model. If uniform=False (set at the beginning), then this is the mean of the Gaussian distribution for the walkers' starting points for this variable
 variables[p]['vary'] = True 
 variables[p]['scale'] = 3.6 #  if uniform=False (set at beginning), then this is the stddev of the Gaussian distribution for the walkers' starting points for this variable
-variables[p]['min'] = -300  # minimum of the parameter range
-variables[p]['max'] = 300 # maximum of the parameter range
+variables[p]['min'] = 38  # minimum of the parameter range
+variables[p]['max'] = 62 # maximum of the parameter range
 variables[p]['my model'] = my_model # make sure this points to your model function
 variables[p]['Gaussian prior'] = False # do you want this parameter to have a Gaussian prior? If False, then the prior is uniform between min and max
 variables[p]['prior mean'] = -129.3 # Gaussian prior mean
@@ -230,7 +231,7 @@ variables[p]['prior stddev'] = 0.6 # Gaussian prior std dev
 
 p = 'am'
 variables[p]['texname'] = r'$log A$'
-variables[p]['value'] = -10.06
+variables[p]['value'] = -11
 variables[p]['vary'] = True
 variables[p]['scale'] = 0.1
 variables[p]['min'] = -18.
@@ -238,7 +239,7 @@ variables[p]['max'] = -8.
 
 p = 'fw_L'
 variables[p]['texname'] = r'$FW_{L}$'
-variables[p]['value'] = 7.76
+variables[p]['value'] = 50
 variables[p]['vary'] = True
 variables[p]['scale'] = 1.
 variables[p]['min'] = 1.
@@ -246,7 +247,7 @@ variables[p]['max'] = 1000.
 
 p = 'fw_G'
 variables[p]['texname'] = r'$FW_{G}$'
-variables[p]['value'] = 88.68
+variables[p]['value'] = 93
 variables[p]['scale'] = 9.
 variables[p]['vary'] = True
 variables[p]['min'] = 1.
@@ -273,7 +274,7 @@ variables[p]['prior stddev'] = 3
 
 p = 'h1_vel'
 variables[p]['texname'] = r'$v_{HI}$'
-variables[p]['value'] = 4.18
+variables[p]['value'] = 5 #5
 variables[p]['vary'] = True 
 variables[p]['scale'] = 1.
 variables[p]['min'] = -30
@@ -491,3 +492,6 @@ if perform_error:
     ax.set_ylabel('Flux Density (erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$)',fontsize=18)
 
     ax.minorticks_on()
+
+
+print(f"Total time: {time.time() - start_time}")

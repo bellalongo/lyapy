@@ -251,6 +251,8 @@ def profile_plot(x, y, yerr, resolution, samples, model_function, variables, var
 
             ax[0].ticklabel_format(useOffset=False)
             ax[1].ticklabel_format(useOffset=False)
+        
+            plt.savefig("output.jpg")
 
     return line_percentiles_to_store_dic, reconstructed_fluxes_dic
 
