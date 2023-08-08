@@ -38,7 +38,7 @@ nruns = 1# change me next
 # if True: starts the fit from scratch. if False: picks up where the fit left off.
 fresh_start = True
 # if True: does a long error estimation. Don't set to True until your fit has converged and you're satisfied with it.
-perform_error = False 
+perform_error = True 
 # if True: allows the user to mask out part(s) of their data from being evaluated by the log probability function (e.g., airglow)
 mask_data = True
 
@@ -394,7 +394,7 @@ line_percentiles_to_store_dic, reconstructed_fluxes_dic = profile_plot(wave_to_f
     
 """
 if perform_error:
-    filename="TOI-1212_MCMC_results.csv"  # EDIT ME FOR EACH FIT!
+    filename="TOI-1201_MCMC_results.csv"  # EDIT ME FOR EACH FIT!
 
     line_names = ['lya']
     array_per_line_names = ['model', 'model unconvolved', 'intrinsic', 'intrinsic unconvolved', 'ism', 'ism unconvolved', 
@@ -492,6 +492,8 @@ if perform_error:
     ax.set_ylabel('Flux Density (erg cm$^{-2}$ s$^{-1}$ \AA$^{-1}$)',fontsize=18)
 
     ax.minorticks_on()
+
+    plt.savefig("output2.jpg")
 
 
 print(f"Total time: {time.time() - start_time}")
