@@ -238,22 +238,33 @@ def profile_plot(x, y, yerr, resolution, samples, model_function, variables, var
             ax[0].plot( x[i], y_model_best[i], color='deeppink', linewidth=1.5)
 
             ax[0].minorticks_on()
+            
+            # need to force data to have a minimum uncertainty
+            # make sure y_err is greater than the min uncertainty, if not skip the point
+            min_uncertainty = 3.0925987472537685e-16
+            indices_to_remove = [index for index, value in enumerate(yerr[i]) if value < min_uncertainty] # maybe change me!
 
-            # Plot the residuals
-            residuals = (y[i] - y_model_best[i])/yerr[i]
+            filtered_yerr = np.delete(yerr[i], indices_to_remove)
+            filtered_y = np.delete(y[i], indices_to_remove)
+            filtered_y_model_best = np.delete(y_model_best[i], indices_to_remove)
+            filtered_x = np.delete(x[i], indices_to_remove)
 
-            ax[1].plot(x[i], residuals, 'ko')
-            ax[1].hlines(0,np.min(x[i]),np.max(x[i]),color='grey',linestyle='--')
-            ax[1].hlines(1,np.min(x[i]),np.max(x[i]),color='grey',linestyle=':')
-            ax[1].hlines(-1,np.min(x[i]),np.max(x[i]),color='grey',linestyle=':')
+
+            residuals = (filtered_y - filtered_y_model_best)/filtered_yerr
+
+            ax[1].plot(filtered_x, residuals, 'ko')
+            ax[1].hlines(0,np.min(filtered_x),np.max(filtered_x),color='grey',linestyle='--')
+            ax[1].hlines(1,np.min(filtered_x),np.max(filtered_x),color='grey',linestyle=':')
+            ax[1].hlines(-1,np.min(filtered_x),np.max(filtered_x),color='grey',linestyle=':')
 
             ax[1].minorticks_on()
 
             ax[0].ticklabel_format(useOffset=False)
             ax[1].ticklabel_format(useOffset=False)
-        
-            plt.savefig("output.jpg")
 
+
+            plt.savefig("output.jpg")
+    
     return line_percentiles_to_store_dic, reconstructed_fluxes_dic
 
 
@@ -467,6 +478,8 @@ def make_corner_plot(samples, best, variables, variable_order, ndim):
                       max_n_ticks=3,plot_contours=True,quantiles=[0.025,0.975],fig=fig,
                       show_titles=True, title_quantiles =  [0.16,0.5,0.84], verbose=True,truths=best[:,2],range=np.ones(ndim)*1.0) # fix this
     fig.subplots_adjust(bottom=0.1,left=0.1,top=0.8)
+
+    plt.savefig("cornerplt.jpg")
 
     return
 
