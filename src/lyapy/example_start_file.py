@@ -20,17 +20,17 @@ start_time = time.time()
     TOP LEVEL PARAMATERS
 
 """
-# Define parametcleaers for the MCMC
-nwalkers = 200 # how many walkers do you want for your fit?  (100)
-nsteps = 2000 # how many steps? -> maybe change me to be like 300 ? 300 seemed to work fine or gradually increase (1700)
-burnin = 500 # how long is your burnin period?
+# Define parameters for the MCMC
+nwalkers = 100 # how many walkers do you want for your fit?
+nsteps = 5000 # how many steps?
+burnin = 300 # how long is your burnin period?
 
 # Define necessary varialbes
 np.random.seed(982) # change as you see fit. Doesn't really matter.
 
 # if True: start the walkers randomly within each variable's min/max range (defined below)
 # if False: start the walkers in a Gaussian distribution with mean and std dev defined with the variables (below)
-start_uniform = False 
+start_uniform = True 
 
 # how many runs do you want to do? Keep at 1 until you know what you're doing.
 nruns = 1# change me next
@@ -56,7 +56,7 @@ flux_to_fit = data['FLUX']
 error_to_fit = data['ERROR']
 
 # Mask out the Lyman Alpha line
-fit_mask = (wave_to_fit >= 1214.5) & (wave_to_fit <= 1217.5) # subtract some of the lines
+fit_mask = (wave_to_fit >= 1214.5) & (wave_to_fit <= 1216.55)
 
 # Fit the continuum and subtract - not going to do this for E140M...
 cont_mask1 = (wave_to_fit > 1212.) & (wave_to_fit < 1213) # 
@@ -64,7 +64,12 @@ cont_mask2 = (wave_to_fit > 1219.) & (wave_to_fit < 1220)
 cont_mask = cont_mask1 + cont_mask2 
 
 # Make the continuum
-cont_fit = np.polyfit(wave_to_fit[cont_mask],flux_to_fit[cont_mask],deg=1) 
+# cont_fit = np.polyfit(wave_to_fit[cont_mask],flux_to_fit[cont_mask],deg=1) 
+# cont = wave_to_fit * cont_fit[0] + cont_fit[1]
+cont_mask1 = (wave_to_fit > 1212.) & (wave_to_fit < 1213)
+cont_mask2 = (wave_to_fit > 1217.) & (wave_to_fit < 1217.9)
+cont_mask = cont_mask1 + cont_mask2 
+cont_fit = np.polyfit(wave_to_fit[cont_mask],flux_to_fit[cont_mask],deg=1)
 cont = wave_to_fit * cont_fit[0] + cont_fit[1]
 
 plt.figure()
@@ -95,7 +100,7 @@ geo_mod = (peak_geocorona * np.exp(-lz0_geocorona/2.0) )
 
 # Mask out the Lyman Alpha line
 if mask_data:
-    mask = (wave_to_fit >= 1215.417) & (wave_to_fit <=1216)
+    mask = (wave_to_fit >= 1215.5) & (wave_to_fit <=1215.6)
 
 else:
     mask = np.isreal(wave_to_fit) # otherwise all elements of wave_to_fit evaluated by fit (fix me why np.arrange error)
@@ -219,11 +224,11 @@ variables = make_parameter_dictionary(variables_order)
 # value: median(min,max)
 p = 'vs'
 variables[p]['texname'] = r'$v$' # for the cornerplot
-variables[p]['value'] = 14 # if vary = False, then this is the value of this variable assumed by the model. If uniform=False (set at the beginning), then this is the mean of the Gaussian distribution for the walkers' starting points for this variable
+variables[p]['value'] = 50 # if vary = False, then this is the value of this variable assumed by the model. If uniform=False (set at the beginning), then this is the mean of the Gaussian distribution for the walkers' starting points for this variable
 variables[p]['vary'] = True 
 variables[p]['scale'] = 3.6 #  if uniform=False (set at beginning), then this is the stddev of the Gaussian distribution for the walkers' starting points for this variable
-variables[p]['min'] =  -11 # minimum of the parameter range
-variables[p]['max'] = 39 # maximum of the parameter range
+variables[p]['min'] = 38  # minimum of the parameter range
+variables[p]['max'] = 62 # maximum of the parameter range
 variables[p]['my model'] = my_model # make sure this points to your model function
 variables[p]['Gaussian prior'] = False # do you want this parameter to have a Gaussian prior? If False, then the prior is uniform between min and max
 variables[p]['prior mean'] = -129.3 # Gaussian prior mean
@@ -231,23 +236,23 @@ variables[p]['prior stddev'] = 0.6 # Gaussian prior std dev
 
 p = 'am'
 variables[p]['texname'] = r'$log A$'
-variables[p]['value'] = -10.06
+variables[p]['value'] = -8
 variables[p]['vary'] = True
 variables[p]['scale'] = 0.1
-variables[p]['min'] = -15. # see if need to adjust me!
-variables[p]['max'] = -8. # see if need to adjust me!
+variables[p]['min'] = -13.
+variables[p]['max'] = 0.
 
 p = 'fw_L'
 variables[p]['texname'] = r'$FW_{L}$'
-variables[p]['value'] = 5 # maybe change to 5???
+variables[p]['value'] = 50
 variables[p]['vary'] = True
 variables[p]['scale'] = 1.
 variables[p]['min'] = 1.
-variables[p]['max'] = 10.
+variables[p]['max'] = 100.
 
 p = 'fw_G'
 variables[p]['texname'] = r'$FW_{G}$'
-variables[p]['value'] = 220
+variables[p]['value'] = 93
 variables[p]['scale'] = 9.
 variables[p]['vary'] = True
 variables[p]['min'] = 1.
@@ -277,7 +282,7 @@ variables[p]['texname'] = r'$v_{HI}$'
 variables[p]['value'] = 4.18
 variables[p]['vary'] = True 
 variables[p]['scale'] = 1.
-variables[p]['min'] = -30
+variables[p]['min'] = 0
 variables[p]['max'] = 30.
 variables[p]['offset'] = False # do you want this parameter to be offset from the vs parameter, or independent?
 variables[p]['Gaussian prior'] = False
@@ -324,6 +329,7 @@ variables[p]['vary'] = True
 variables[p]['scale'] = 0.1
 variables[p]['min'] = 1.0
 variables[p]['max'] = 1.8
+
 
 perform_variable_check(variables)
 
@@ -387,13 +393,14 @@ else:
 
 line_percentiles_to_store_dic, reconstructed_fluxes_dic = profile_plot(wave_to_fit, flux_to_fit, error_to_fit, resolution, samples, my_model, variables, variables_order, perform_error=perform_error, thin_out=10, convolve='both') # thin_out is a parameter that makes this run faster (only makes a difference if perform_error = True)
 
+
 """
 
     SAVE FIT RESULTS
     
 """
 if perform_error:
-    filename="what_MCMC_results.csv"  # EDIT ME FOR EACH FIT!
+    filename="TOI-1201_MCMC_results.csv"  # EDIT ME FOR EACH FIT!
 
     line_names = ['lya']
     array_per_line_names = ['model', 'model unconvolved', 'intrinsic', 'intrinsic unconvolved', 'ism', 'ism unconvolved', 
@@ -496,4 +503,3 @@ if perform_error:
 
 
 print(f"Total time: {time.time() - start_time}")
-plt.show()
